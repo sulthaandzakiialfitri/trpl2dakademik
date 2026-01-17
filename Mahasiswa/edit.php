@@ -8,7 +8,6 @@
     <div class="container-sm py-4 px-5">
         <?php
         require __DIR__ . '/../koneksi.php';
-        // Mengambil data berdasarkan parameter nim dari URL (gunakan prepared statement untuk safety)
         $nim_target = isset($_GET['nim']) ? $_GET['nim'] : '';
         $stmt = $koneksi->prepare("SELECT * FROM mahasiswa WHERE nim = ?");
         $stmt->bind_param('s', $nim_target);
@@ -18,7 +17,6 @@
         $stmt->close();
 
         if (!$data) {
-            // jika tidak ditemukan, kembali ke list
             header('Location: ../index.php?page=mahasiswa');
             exit();
         }

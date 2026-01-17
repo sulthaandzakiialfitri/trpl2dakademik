@@ -15,7 +15,6 @@
     <tbody>
         <?php
         require __DIR__ . '/../koneksi.php';
-        // Mengambil data dari tabel mahasiswa dengan nama prodi
         $tampil = $koneksi->query("SELECT m.*, p.nama_prodi FROM mahasiswa m LEFT JOIN prodi p ON m.prodi_id = p.id");
         $i = 1;
 

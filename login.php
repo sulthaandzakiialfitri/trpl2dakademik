@@ -34,12 +34,10 @@
             $pass = md5($_POST['password']);
 
             require 'koneksi.php';
-            //cek login
             $ceklogin = "SELECT * FROM pengguna WHERE email = '$email' AND password = '$pass'";
             $result = $koneksi->query($ceklogin);
 
             if ($result->num_rows > 0) {
-                //echo "login berhasil";
                 session_start();
                 $_SESSION['login'] = TRUE;
                 $_SESSION['email'] = $email;

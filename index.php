@@ -11,13 +11,11 @@
        $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
        if($page == 'home') include 'home.php';
-       // Mahasiswa routes
-       if($page == 'mahasiswa') include 'mahasiswa/list.php'; // Mengarah ke list mahasiswa
+       if($page == 'mahasiswa') include 'mahasiswa/list.php'; 
        if($page == 'mahasiswa-create') include 'mahasiswa/create.php';
        if($page == 'mahasiswa-edit') include 'mahasiswa/edit.php';
 
-       // Prodi routes
-       if($page == 'prodi') include 'prodi/list.php'; // Mengarah ke list prodi
+       if($page == 'prodi') include 'prodi/list.php'; 
        if($page == 'prodi-create') include 'prodi/create.php';
        if($page == 'prodi-edit') include 'prodi/edit.php';
        ?>

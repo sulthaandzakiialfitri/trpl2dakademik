@@ -1,5 +1,4 @@
 <?php
-//$db=mysqli_connect('localhost','root','','db_akademik');
 
 $host = "localhost";
 $user = "root";
