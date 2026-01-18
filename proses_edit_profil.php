@@ -1,9 +1,8 @@
-
 <?php
 session_start();
 include 'koneksi.php';
 
-if (!isset($_SESSION['login'])) {
+if (!isset($_SESSION['login']) || !isset($_SESSION['id_user'])) {
     header("Location: login.php");
     exit;
 }
@@ -17,15 +16,22 @@ if ($nama === '') {
 }
 
 if ($password !== '') {
-    $password_hash = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "UPDATE user SET nama='$nama', password='$password_hash' WHERE id_user='$id_user'";
+    $password_md5 = md5($password);
+
+    $sql = "UPDATE pengguna 
+            SET nama = '$nama', password = '$password_md5'
+            WHERE id_user = '$id_user'";
 } else {
-    $sql = "UPDATE user SET nama='$nama' WHERE id_user='$id_user'";
+    $sql = "UPDATE pengguna 
+            SET nama = '$nama'
+            WHERE id_user = '$id_user'";
 }
 
-if (mysqli_query($koneksi, $sql)) {
+$query = mysqli_query($koneksi, $sql);
+
+if ($query) {
     header("Location: index.php");
     exit;
 } else {
-    echo "Gagal update profil";
+    echo "Gagal update profil: " . mysqli_error($koneksi);
 }

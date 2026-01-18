@@ -1,57 +1,79 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+session_start();
+require 'koneksi.php';
+
+$error = '';
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Login</h1>
-        <form action="" method="post">
+    <div class="container mt-5" style="max-width:400px">
+
+        <h3 class="mb-3">Login</h3>
+
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= $error ?></div>
+        <?php endif; ?>
+
+        <form method="post">
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Email address</label>
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required>
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" required>
             </div>
+
             <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input name='password' type="password" class="form-control" id="exampleInputPassword1">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" required>
             </div>
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                <label class="form-check-label" for="exampleCheck1">Remember Me</label>
-            </div>
-            <button name='submit' type="submit" class="btn btn-primary">Submit</button>
+
+            <button type="submit" name="submit" class="btn btn-primary w-100">
+                Login
+            </button>
         </form>
+
         <?php
         if (isset($_POST['submit'])) {
-            $email = $_POST['email'];
-            $pass = md5($_POST['password']);
 
-            require 'koneksi.php';
-            $ceklogin = "SELECT * FROM pengguna WHERE email = '$email' AND password = '$pass'";
-            $result = $koneksi->query($ceklogin);
+            $email = trim($_POST['email']);
+            $password = md5($_POST['password']);
 
-            if ($result->num_rows > 0) {
-                session_start();
-                $_SESSION['login'] = TRUE;
-                $_SESSION['email'] = $email;
+            $sql = "SELECT * FROM pengguna 
+                WHERE email='$email' 
+                AND password='$password'
+                LIMIT 1";
+
+            $result = mysqli_query($koneksi, $sql);
+
+            if (!$result) {
+                die("Query error: " . mysqli_error($koneksi));
+            }
+
+            if (mysqli_num_rows($result) === 1) {
+                $user = mysqli_fetch_assoc($result);
+
+                $_SESSION['login'] = true;
+                $_SESSION['id'] = $user['id'];
+                $_SESSION['email'] = $user['email'];
+                $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
+
                 header("Location: index.php");
+                exit;
             } else {
-                echo "login gagal";
+                echo "<div class='alert alert-danger mt-3'>Email atau password salah</div>";
             }
         }
-
         ?>
+
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
 </body>
 
 </html>

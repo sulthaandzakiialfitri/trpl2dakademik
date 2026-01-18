@@ -1,71 +1,103 @@
-<html>
+<?php
+require 'koneksi.php';
 
-<head>
-    <title>Edit Mahasiswa</title>
-</head>
+$id = $_GET['id'] ?? 0;
+if ($id == 0) {
+    echo "<div class='alert alert-danger'>ID tidak valid</div>";
+    exit;
+}
 
-<body>
-    <div class="container-sm py-4 px-5">
-        <?php
-        require __DIR__ . '/../koneksi.php';
-        $nim_target = isset($_GET['nim']) ? $_GET['nim'] : '';
-        $stmt = $koneksi->prepare("SELECT * FROM mahasiswa WHERE nim = ?");
-        $stmt->bind_param('s', $nim_target);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $data = $res->fetch_assoc();
-        $stmt->close();
+// Ambil data mahasiswa
+$q = $koneksi->prepare("SELECT * FROM mahasiswa WHERE id = ?");
+$q->bind_param("i", $id);
+$q->execute();
+$res = $q->get_result();
+$mhs = $res->fetch_assoc();
 
-        if (!$data) {
-            header('Location: ../index.php?page=mahasiswa');
-            exit();
-        }
-        ?>
+if (!$mhs) {
+    echo "<div class='alert alert-danger'>Data tidak ditemukan</div>";
+    exit;
+}
 
-        <h3>Edit Data Mahasiswa</h3>
-        <form action="mahasiswa/proses.php" method="post">
+// Update data
+if (isset($_POST['update'])) {
 
-            <div class="mb-3">
-                <label class="form-label">NIM</label>
-                <input name="nim" type="text" class="form-control" value="<?php echo $data['nim']; ?>" readonly>
-            </div>
+    $nim = $_POST['nim'];
+    $nama = $_POST['nama_mhs'];
+    $prodi = $_POST['prodi_id'];
+    $alamat = $_POST['alamat'];
 
-            <div class="mb-3">
-                <label class="form-label">Nama Mahasiswa</label>
-                <input name="nama_mahasiswa" type="text" class="form-control"
-                    value="<?php echo $data['nama_mahasiswa']; ?>" required>
-            </div>
+    // Validasi FK
+    $cek = $koneksi->prepare("SELECT id FROM prodi WHERE id = ?");
+    $cek->bind_param("i", $prodi);
+    $cek->execute();
+    $cek->store_result();
 
-            <div class="mb-3">
-                <label class="form-label">Tanggal Lahir</label>
-                <input name="tgl_lahir" type="date" class="form-control" value="<?php echo $data['tgl_lahir']; ?>"
-                    required>
-            </div>
+    if ($cek->num_rows === 0) {
+        die("Prodi tidak valid");
+    }
 
-            <div class="mb-3">
-                <label class="form-label">Prodi</label>
-                <?php
-                $prodi_list = $koneksi->query("SELECT * FROM prodi ORDER BY nama_prodi");
-                ?>
-                <select name="prodi_id" class="form-select" required>
-                    <option value="">-- Pilih Prodi --</option>
-                    <?php while ($row = mysqli_fetch_assoc($prodi_list)) { ?>
-                        <option value="<?= $row['id'] ?>" <?php if ($data['prodi_id'] == $row['id'])
-                              echo 'selected'; ?>>
-                            <?= $row['nama_prodi'] ?> (<?= $row['jenjang'] ?>)</option>
-                    <?php } ?>
-                </select>
-            </div>
+    $up = $koneksi->prepare(
+        "UPDATE mahasiswa 
+         SET nim=?, nama_mhs=?, tgl_lahir = ?, prodi_id = ?, alamat = ?
+         WHERE id=?"
+    );
+    $up->bind_param("ssisi", $nim, $nama, $tgl_lahir, $prodi_id, $alamat, $id);
 
-            <div class="mb-3">
-                <label class="form-label">Alamat</label>
-                <textarea name="alamat" class="form-control" rows="3" required><?php echo $data['alamat']; ?></textarea>
-            </div>
+    if ($up->execute()) {
+        echo "<script>
+                alert('Data mahasiswa berhasil diperbarui');
+                location.href='index.php?page=mahasiswa';
+              </script>";
+        exit;
+    } else {
+        echo "<div class='alert alert-danger'>Gagal update</div>";
+    }
+}
+?>
 
-            <input type="submit" value="Update Data" name="update" class="btn btn-primary">
-            <a href="../index.php?page=mahasiswa" class="btn btn-danger">Batal</a>
-        </form>
+<h4>Edit Mahasiswa</h4>
+
+<form method="post">
+    <div class="mb-3">
+        <label>NIM</label>
+        <input type="text" name="nim" class="form-control" value="<?= htmlspecialchars($mhs['nim']); ?>" required>
     </div>
-</body>
 
-</html>
+    <div class="mb-3">
+        <label>Nama Mahasiswa</label>
+        <input type="text" name="nama_mhs" class="form-control" value="<?= htmlspecialchars($mhs['nama_mhs']); ?>"
+            required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tanggal Lahir</label>
+        <input type="date" name="tgl_lahir" value="<?= $data['tgl_lahir']; ?>" class="form-control" required>
+    </div>
+
+
+    <div class="mb-3">
+        <label>Program Studi</label>
+        <select name="prodi_id" class="form-control" required>
+            <?php
+            $prodi = mysqli_query($koneksi, "SELECT * FROM prodi");
+            while ($p = mysqli_fetch_assoc($prodi)) {
+                $selected = ($p['id'] == $mhs['prodi_id']) ? 'selected' : '';
+                echo "<option value='{$p['id']}' $selected>{$p['nama_prodi']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Alamat</label>
+        <textarea name="alamat" class="form-control" required><?= htmlspecialchars($mhs['alamat']); ?></textarea>
+    </div>
+
+    <button type="submit" name="update" class="btn btn-primary">
+        Simpan Perubahan
+    </button>
+    <a href="index.php?page=mahasiswa" class="btn btn-secondary">
+        Kembali
+    </a>
+</form>

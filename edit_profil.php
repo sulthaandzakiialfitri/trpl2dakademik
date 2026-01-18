@@ -1,35 +1,76 @@
-
 <?php
-session_start();
-include 'koneksi.php';
+require 'koneksi.php';
 
-if (!isset($_SESSION['login'])) {
-    header("Location: login.php");
+$id = $_SESSION['id'] ?? 0;
+
+if ($id == 0) {
+    echo "<div class='alert alert-danger'>Session user tidak ditemukan</div>";
     exit;
 }
 
-$id_user = $_SESSION['id_user'];
-$query = mysqli_query($koneksi, "SELECT * FROM user WHERE id_user='$id_user'");
+$query = mysqli_query($koneksi, "SELECT * FROM pengguna WHERE id='$id'");
+
+if (!$query) {
+    die("Query error: " . mysqli_error($koneksi));
+}
+
 $user = mysqli_fetch_assoc($query);
+
+if (!$user) {
+    echo "<div class='alert alert-danger'>Data user tidak ditemukan</div>";
+    exit;
+}
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Profil</title>
-</head>
-<body>
-<h2>Edit Profil</h2>
-<form method="POST" action="proses_edit_profil.php">
-    <label>Nama</label><br>
-    <input type="text" name="nama" value="<?= htmlspecialchars($user['nama']) ?>" required><br><br>
 
-    <label>Email</label><br>
-    <input type="email" value="<?= htmlspecialchars($user['email']) ?>" readonly><br><br>
+<h4>Edit Profil</h4>
 
-    <label>Password Baru</label><br>
-    <input type="password" name="password" placeholder="Kosongkan jika tidak diubah"><br><br>
+<form method="post">
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" value="<?= $user['email']; ?>" readonly>
+    </div>
 
-    <button type="submit" name="simpan">Simpan</button>
+    <div class="mb-3">
+        <label>Nama Lengkap</label>
+        <input type="text" name="nama_lengkap" class="form-control"
+               value="<?= $user['nama_lengkap']; ?>" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Password Baru (kosongkan jika tidak diubah)</label>
+        <input type="password" name="password" class="form-control">
+    </div>
+
+    <button name="update" class="btn btn-primary">Simpan</button>
 </form>
-</body>
-</html>
+
+<?php
+if (isset($_POST['update'])) {
+
+    $nama = trim($_POST['nama_lengkap']);
+    $password = $_POST['password'];
+
+    if ($password != '') {
+        $password = md5($password);
+        $sql = "UPDATE pengguna 
+                SET nama_lengkap='$nama', password='$password' 
+                WHERE id='$id'";
+    } else {
+        $sql = "UPDATE pengguna 
+                SET nama_lengkap='$nama' 
+                WHERE id='$id'";
+    }
+
+    if (mysqli_query($koneksi, $sql)) {
+
+        $_SESSION['nama_lengkap'] = $nama;
+
+        echo "<script>
+                alert('Profil berhasil diperbarui');
+                location.href='index.php';
+              </script>";
+    } else {
+        echo "<div class='alert alert-danger'>Gagal update</div>";
+    }
+}
+?>
