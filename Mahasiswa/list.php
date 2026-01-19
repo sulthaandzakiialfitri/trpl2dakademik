@@ -23,7 +23,7 @@
             <tr>
                 <th scope="row"><?= $i++ ?></th>
                 <td><?= $data['nim']; ?></td>
-                <td><?= $data['nama_mahasiswa']; ?></td>
+                <td><?= $data['nama_mhs']; ?></td>
                 <td><?= $data['tgl_lahir']; ?></td>
                 <td><?= $data['alamat']; ?></td>
                 <td><?= !empty($data['nama_prodi']) ? $data['nama_prodi'] : '-'; ?></td>

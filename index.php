@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
 session_start();
 
 if (!isset($_SESSION['login'])) {
@@ -14,6 +15,7 @@ if (!isset($_SESSION['login'])) {
 <head>
     <meta charset="UTF-8">
     <title>Sistem Informasi Akademik</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -21,6 +23,7 @@ if (!isset($_SESSION['login'])) {
 
 <body>
 
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
         <div class="container">
             <a class="navbar-brand" href="index.php">Akademik</a>
@@ -30,6 +33,8 @@ if (!isset($_SESSION['login'])) {
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
+
+                <!-- MENU KIRI -->
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="index.php">Home</a>
@@ -42,11 +47,12 @@ if (!isset($_SESSION['login'])) {
                     </li>
                 </ul>
 
+                <!-- MENU KANAN -->
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-user-circle"></i>
-                            <?= htmlspecialchars($_SESSION['nama_lengkap']); ?>
+                            <?= htmlspecialchars($_SESSION['nama_lengkap'] ?? 'User'); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
@@ -71,30 +77,32 @@ if (!isset($_SESSION['login'])) {
         </div>
     </nav>
 
+    <!-- CONTENT -->
     <div class="container my-4">
         <?php
         $page = $_GET['page'] ?? 'home';
 
         switch ($page) {
 
+            /* ================= HOME ================= */
             case 'home':
                 include "home.php";
                 break;
 
-            // ===== MAHASISWA =====
+            /* ================= MAHASISWA ================= */
             case 'mahasiswa':
-                include "mahasiswa/list.php";
+                include "Mahasiswa/list.php";
                 break;
 
             case 'mahasiswa-create':
-                include "mahasiswa/create.php";
+                include "Mahasiswa/create.php";
                 break;
 
             case 'mahasiswa-edit':
-                include "mahasiswa/edit.php";
+                include "Mahasiswa/edit.php";
                 break;
 
-            // ===== PRODI =====
+            /* ================= PRODI ================= */
             case 'prodi':
                 include "prodi/list.php";
                 break;
@@ -107,13 +115,15 @@ if (!isset($_SESSION['login'])) {
                 include "prodi/edit.php";
                 break;
 
-            // ===== PROFILE =====
+            /* ================= PROFILE ================= */
             case 'profile-edit':
                 include "edit_profil.php";
                 break;
 
+            /* ================= DEFAULT ================= */
             default:
                 echo "<div class='alert alert-danger'>Halaman tidak ditemukan</div>";
+                break;
         }
         ?>
     </div>

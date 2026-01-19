@@ -1,13 +1,13 @@
 <?php
 require '../koneksi.php';
 
-$nim = $_POST['nim'] ?? '';
-$nama = $_POST['nama_mhs'] ?? '';
+$nim = trim($_POST['nim']);
+$nama = trim($_POST['nama_mhs']);
 $tgl_lahir = $_POST['tgl_lahir'];
-$prodi = $_POST['prodi_id'] ?? '';
-$alamat = $_POST['alamat'] ?? '';
+$prodi = $_POST['prodi_id'];
+$alamat = trim($_POST['alamat']);
 
-if ($nim === '' || $nama === '' || $prodi === '' || $alamat === '') {
+if ($nim === '' || $nama === '' || $tgl_lahir === '' || $prodi === '' || $alamat === '') {
     die("Semua field wajib diisi");
 }
 
@@ -17,7 +17,7 @@ $cek->execute();
 $cek->store_result();
 
 if ($cek->num_rows === 0) {
-    die("Prodi tidak valid (foreign key gagal)");
+    die("Program studi tidak valid");
 }
 
 $stmt = $koneksi->prepare(
@@ -25,11 +25,8 @@ $stmt = $koneksi->prepare(
      VALUES (?, ?, ?, ?, ?)"
 );
 
-$stmt->bind_param("ssis", $nim, $nama, $tgl_lahir, $prodi, $alamat);
+$stmt->bind_param("sssis", $nim, $nama, $tgl_lahir, $prodi, $alamat);
+$stmt->execute();
 
-if ($stmt->execute()) {
-    header("Location: ../index.php?page=mahasiswa");
-    exit;
-} else {
-    die("Gagal menyimpan mahasiswa");
-}
+header("Location: ../index.php?page=mahasiswa");
+exit;
